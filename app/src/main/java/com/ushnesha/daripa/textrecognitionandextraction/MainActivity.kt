@@ -26,7 +26,6 @@ import kotlinx.android.synthetic.main.content_text_recognition.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val textRecognitionModels = ArrayList<TextRecognitionModel>()
     private lateinit var bottomSheetBehavior : BottomSheetBehavior<LinearLayout>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,10 +41,6 @@ class MainActivity : AppCompatActivity() {
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .start(this)
         }
-
-        bottom_sheet_recycler_view.layoutManager = LinearLayoutManager(this)
-
-        bottom_sheet_recycler_view.adapter = TextRecognitionAdapter(this, textRecognitionModels)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -68,8 +63,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         text_recognition_image_view.setImageBitmap(null)
-        textRecognitionModels.clear()
-        bottom_sheet_recycler_view.adapter?.notifyDataSetChanged()
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         showProgress()
 
@@ -81,7 +74,6 @@ class MainActivity : AppCompatActivity() {
                 recognizeText(it, mutableImage)
                 text_recognition_image_view.setImageBitmap(mutableImage)
                 hideProgress()
-                bottom_sheet_recycler_view.adapter?.notifyDataSetChanged()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
             .addOnFailureListener{
@@ -106,14 +98,16 @@ class MainActivity : AppCompatActivity() {
         textPaint.color = Color.RED
         textPaint.textSize = 40F
 
-        var index = 0
+
         for( block in visionText.textBlocks){
             for( line in block.lines){
                 canvas.drawRect(line.boundingBox, rectPaint)
-                canvas.drawText(index.toString(), line.cornerPoints!![2].x.toFloat(), line.cornerPoints!![2].y.toFloat(), textPaint)
-                textRecognitionModels.add(TextRecognitionModel(index++, line.text))
+                canvas.drawText(0.toString(), line.cornerPoints!![2].x.toFloat(), line.cornerPoints!![2].y.toFloat(), textPaint)
+
             }
         }
+        item_text_recognition_text_view.text = visionText.text
+
     }
 
     private fun showProgress() {
